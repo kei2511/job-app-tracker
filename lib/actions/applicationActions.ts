@@ -15,10 +15,15 @@ export async function createApplication(data: any) {
       return { success: false, error: 'User not authenticated' };
     }
 
+    const userId = session.user?.id;
+    if (!userId) {
+      return { success: false, error: 'User not authenticated' };
+    }
+
     const application = await db.application.create({
       data: {
         ...data,
-        userId: session.user.id,
+        userId,
         date_applied: data.date_applied ? new Date(data.date_applied) : new Date(),
       },
     });
@@ -39,13 +44,18 @@ export async function updateApplication(id: string, data: any) {
     if (!session) {
       return { success: false, error: 'User not authenticated' };
     }
-    
+
+    const userId = session.user?.id;
+    if (!userId) {
+      return { success: false, error: 'User not authenticated' };
+    }
+
     // Verify that the application belongs to the current user
     const application = await db.application.findUnique({
       where: { id }
     });
-    
-    if (application?.userId !== session.user.id) {
+
+    if (application?.userId !== userId) {
       return { success: false, error: 'Unauthorized' };
     }
 
@@ -76,13 +86,18 @@ export async function deleteApplication(id: string) {
     if (!session) {
       return { success: false, error: 'User not authenticated' };
     }
-    
+
+    const userId = session.user?.id;
+    if (!userId) {
+      return { success: false, error: 'User not authenticated' };
+    }
+
     // Verify that the application belongs to the current user
     const application = await db.application.findUnique({
       where: { id }
     });
-    
-    if (application?.userId !== session.user.id) {
+
+    if (application?.userId !== userId) {
       return { success: false, error: 'Unauthorized' };
     }
 
@@ -106,13 +121,18 @@ export async function updateApplicationStatus(id: string, status: string) {
     if (!session) {
       return { success: false, error: 'User not authenticated' };
     }
-    
+
+    const userId = session.user?.id;
+    if (!userId) {
+      return { success: false, error: 'User not authenticated' };
+    }
+
     // Verify that the application belongs to the current user
     const application = await db.application.findUnique({
       where: { id }
     });
-    
-    if (application?.userId !== session.user.id) {
+
+    if (application?.userId !== userId) {
       return { success: false, error: 'Unauthorized' };
     }
 

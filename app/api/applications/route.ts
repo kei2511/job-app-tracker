@@ -15,13 +15,21 @@ export async function GET(request: NextRequest) {
       });
     }
 
+    const userId = session.user?.id;
+    if (!userId) {
+      return new Response(JSON.stringify({ error: 'User not authenticated' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     const searchParams = request.nextUrl.searchParams;
     const status = searchParams.get('status');
     
     let applications;
     
     const whereClause = {
-      userId: session.user.id,
+      userId,
       ...(status && { status: status as any })
     };
     
@@ -54,6 +62,14 @@ export async function POST(request: NextRequest) {
       });
     }
 
+    const userId = session.user?.id;
+    if (!userId) {
+      return new Response(JSON.stringify({ error: 'User not authenticated' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     const data = await request.json();
     
     // Set default status to 'APPLIED' if not provided
@@ -64,7 +80,7 @@ export async function POST(request: NextRequest) {
     const application = await db.application.create({
       data: {
         ...data,
-        userId: session.user.id,
+        userId,
         date_applied: data.date_applied ? new Date(data.date_applied) : new Date(),
       },
     });
