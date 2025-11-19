@@ -10,7 +10,7 @@ export async function GET(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session) {
       return new Response(JSON.stringify({ error: 'User not authenticated' }), {
         status: 401,
@@ -18,11 +18,19 @@ export async function GET(
       });
     }
 
+    const userId = session.user?.id;
+    if (!userId) {
+      return new Response(JSON.stringify({ error: 'User not authenticated' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     const { id } = params;
-    const application = await db.application.findUnique({
+    const application = await db.application.findFirst({
       where: { 
         id,
-        userId: session.user.id
+        userId
       },
     });
 
@@ -52,8 +60,16 @@ export async function PUT(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session) {
+      return new Response(JSON.stringify({ error: 'User not authenticated' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const userId = session.user?.id;
+    if (!userId) {
       return new Response(JSON.stringify({ error: 'User not authenticated' }), {
         status: 401,
         headers: { 'Content-Type': 'application/json' },
@@ -68,7 +84,7 @@ export async function PUT(
       where: { id }
     });
     
-    if (application?.userId !== session.user.id) {
+    if (application?.userId !== userId) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 403,
         headers: { 'Content-Type': 'application/json' },
@@ -103,7 +119,7 @@ export async function DELETE(
 ) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session) {
       return new Response(JSON.stringify({ error: 'User not authenticated' }), {
         status: 401,
@@ -111,14 +127,22 @@ export async function DELETE(
       });
     }
 
+    const userId = session.user?.id;
+    if (!userId) {
+      return new Response(JSON.stringify({ error: 'User not authenticated' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
     const { id } = params;
-    
+
     // Verify that the application belongs to the current user
     const application = await db.application.findUnique({
       where: { id }
     });
-    
-    if (application?.userId !== session.user.id) {
+
+    if (application?.userId !== userId) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 403,
         headers: { 'Content-Type': 'application/json' },
