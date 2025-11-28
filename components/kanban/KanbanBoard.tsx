@@ -44,7 +44,28 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ initialApplications, onUpdate
     const updatedAppsOptimistic = applications.map(app =>
       app.id === draggableId ? { ...app, status: destination.droppableId as any, last_updated: new Date() } : app
     );
-    setApplications(updatedAppsOptimistic);
+
+    // Re-sort the list after the status change
+    const sortedApps = [...updatedAppsOptimistic].sort((a, b) => {
+      // First, sort by bookmark status (bookmarked first)
+      if (a.is_bookmarked && !b.is_bookmarked) return -1;
+      if (!a.is_bookmarked && b.is_bookmarked) return 1;
+
+      // If both are bookmarked or both not bookmarked, sort by priority
+      const priorityOrder: Record<string, number> = { 'HIGH': 3, 'MEDIUM': 2, 'LOW': 1 };
+      const priorityA = priorityOrder[a.priority as string] || 2; // Default to MEDIUM if not set
+      const priorityB = priorityOrder[b.priority as string] || 2; // Default to MEDIUM if not set
+
+      // If priorities are different, sort by priority
+      if (priorityA !== priorityB) {
+        return priorityB - priorityA; // Higher priority first
+      }
+
+      // If priorities are the same, sort by date applied (newest first)
+      return new Date(b.date_applied).getTime() - new Date(a.date_applied).getTime();
+    });
+
+    setApplications(sortedApps);
 
     // Update the status in the database
     try {

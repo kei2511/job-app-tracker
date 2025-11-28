@@ -19,7 +19,27 @@ interface DashboardClientProps {
 }
 
 const DashboardClient: React.FC<DashboardClientProps> = ({ initialApplications }) => {
-  const [applications, setApplications] = useState<Application[]>(initialApplications);
+  // Sort applications by bookmark status (bookmarked first), then by priority (HIGH > MEDIUM > LOW), and then by date applied
+  const sortedInitialApplications = [...initialApplications].sort((a, b) => {
+    // First, sort by bookmark status (bookmarked first)
+    if (a.is_bookmarked && !b.is_bookmarked) return -1;
+    if (!a.is_bookmarked && b.is_bookmarked) return 1;
+
+    // If both are bookmarked or both not bookmarked, sort by priority
+    const priorityOrder: Record<string, number> = { HIGH: 3, MEDIUM: 2, LOW: 1 };
+    const priorityA = priorityOrder[a.priority as string] || 2; // Default to MEDIUM if not set
+    const priorityB = priorityOrder[b.priority as string] || 2; // Default to MEDIUM if not set
+
+    // If priorities are different, sort by priority
+    if (priorityA !== priorityB) {
+      return priorityB - priorityA; // Higher priority first
+    }
+
+    // If priorities are the same, sort by date applied (newest first)
+    return new Date(b.date_applied).getTime() - new Date(a.date_applied).getTime();
+  });
+
+  const [applications, setApplications] = useState<Application[]>(sortedInitialApplications);
   const [showForm, setShowForm] = useState(false);
   const [viewMode, setViewMode] = useState<'kanban' | 'table'>('kanban'); // Default to kanban view
 
@@ -28,7 +48,26 @@ const DashboardClient: React.FC<DashboardClientProps> = ({ initialApplications }
       const response = await fetch('/api/applications');
       if (response.ok) {
         const data = await response.json();
-        setApplications(data);
+        // Sort applications by bookmark status (bookmarked first), then by priority (HIGH > MEDIUM > LOW), and then by date applied
+        const sortedData = [...data].sort((a, b) => {
+          // First, sort by bookmark status (bookmarked first)
+          if (a.is_bookmarked && !b.is_bookmarked) return -1;
+          if (!a.is_bookmarked && b.is_bookmarked) return 1;
+
+          // If both are bookmarked or both not bookmarked, sort by priority
+          const priorityOrder: Record<string, number> = { HIGH: 3, MEDIUM: 2, LOW: 1 };
+          const priorityA = priorityOrder[a.priority as string] || 2; // Default to MEDIUM if not set
+          const priorityB = priorityOrder[b.priority as string] || 2; // Default to MEDIUM if not set
+
+          // If priorities are different, sort by priority
+          if (priorityA !== priorityB) {
+            return priorityB - priorityA; // Higher priority first
+          }
+
+          // If priorities are the same, sort by date applied (newest first)
+          return new Date(b.date_applied).getTime() - new Date(a.date_applied).getTime();
+        });
+        setApplications(sortedData);
       }
     } catch (error) {
       console.error('Error fetching applications:', error);
@@ -48,9 +87,32 @@ const DashboardClient: React.FC<DashboardClientProps> = ({ initialApplications }
   }, []);
 
   const handleApplicationUpdate = (updatedApplication: Application) => {
-    setApplications(prev =>
-      prev.map(app => app.id === updatedApplication.id ? updatedApplication : app)
-    );
+    setApplications(prev => {
+      // Update the specific application
+      const updatedList = prev.map(app =>
+        app.id === updatedApplication.id ? updatedApplication : app
+      );
+
+      // Re-sort the list after update
+      return updatedList.sort((a, b) => {
+        // First, sort by bookmark status (bookmarked first)
+        if (a.is_bookmarked && !b.is_bookmarked) return -1;
+        if (!a.is_bookmarked && b.is_bookmarked) return 1;
+
+        // If both are bookmarked or both not bookmarked, sort by priority
+        const priorityOrder: Record<string, number> = { HIGH: 3, MEDIUM: 2, LOW: 1 };
+        const priorityA = priorityOrder[a.priority as string] || 2; // Default to MEDIUM if not set
+        const priorityB = priorityOrder[b.priority as string] || 2; // Default to MEDIUM if not set
+
+        // If priorities are different, sort by priority
+        if (priorityA !== priorityB) {
+          return priorityB - priorityA; // Higher priority first
+        }
+
+        // If priorities are the same, sort by date applied (newest first)
+        return new Date(b.date_applied).getTime() - new Date(a.date_applied).getTime();
+      });
+    });
   };
 
   return (
