@@ -9,9 +9,9 @@ export async function GET(request: NextRequest) {
     if (!process.env.DATABASE_URL) {
       return new Response(
         JSON.stringify({ message: 'Database not configured' }),
-        { 
-          status: 503, 
-          headers: { 'Content-Type': 'application/json' } 
+        {
+          status: 503,
+          headers: { 'Content-Type': 'application/json' }
         }
       );
     }
@@ -35,24 +35,23 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    // Don't return user data for security
     return new Response(
-      JSON.stringify({ 
-        message: 'Database initialized', 
-        admin: { username: adminUser.username },
-        user: { username: regularUser.username }
+      JSON.stringify({
+        message: 'Database initialized',
       }),
-      { 
-        status: 200, 
-        headers: { 'Content-Type': 'application/json' } 
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' }
       }
     );
   } catch (error) {
     console.error('Init error:', error);
     return new Response(
       JSON.stringify({ error: 'An error occurred during initialization' }),
-      { 
-        status: 500, 
-        headers: { 'Content-Type': 'application/json' } 
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' }
       }
     );
   }
