@@ -48,7 +48,11 @@ const ApplicationDetail: React.FC<ApplicationDetailProps> = ({
   const updateStatus = async (newStatus: string) => {
     if (application && application.id) {
       // Optimistically update the local application data
-      const updatedApplication = { ...application, status: newStatus, last_updated: new Date() };
+      const updatedApplication = {
+        ...application,
+        status: newStatus as any, // Type assertion to match the enum type
+        last_updated: new Date()
+      };
 
       // Close the dialog first
       onOpenChange(false);
