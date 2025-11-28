@@ -7,14 +7,17 @@ import { updateApplicationStatus } from '@/lib/actions/applicationActions';
 import { calculateResponseRate, getDaysSinceApplied, isGhosted } from '@/lib/utils';
 import { Application } from '@prisma/client';
 import ApplicationCard from './ApplicationCard';
+import CompactApplicationCard from './CompactApplicationCard';
 import DashboardStats from '../dashboard/DashboardStats';
 import GhostingReminder from '../application/GhostingReminder';
 
 interface KanbanBoardProps {
   initialApplications: Application[];
+  onUpdate?: (updatedApplication: Application) => void;
+  compactView?: boolean;
 }
 
-const KanbanBoard: React.FC<KanbanBoardProps> = ({ initialApplications }) => {
+const KanbanBoard: React.FC<KanbanBoardProps> = ({ initialApplications, onUpdate, compactView = false }) => {
   const [applications, setApplications] = useState<Application[]>(initialApplications);
   
   const statusColumns: { id: string; title: string; color: string }[] = [
@@ -54,6 +57,12 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ initialApplications }) => {
         );
         setApplications(revertedApps);
         console.error('Failed to update application status:', statusChange.error);
+      } else {
+        // Call onUpdate if provided to notify parent about the change
+        if (onUpdate) {
+          const updatedApplication = { ...movedApplication, status: destination.droppableId as any, last_updated: new Date() };
+          onUpdate(updatedApplication);
+        }
       }
     } catch (error) {
       // If server update fails, revert the optimistic update
@@ -98,17 +107,25 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ initialApplications }) => {
                     className="min-h-[150px] p-2"
                   >
                     {column.applications.map((application, index) => (
-                      <div key={application.id} className="mb-2">
-                        <ApplicationCard
-                          application={application}
-                          index={index}
-                          isGhosted={isGhosted(application)}
-                          onUpdate={(updatedApp) => {
-                            setApplications(prev =>
-                              prev.map(app => app.id === updatedApp.id ? updatedApp : app)
-                            );
-                          }}
-                        />
+                      <div key={application.id} className={compactView ? "mb-1" : "mb-2"}>
+                        {compactView ? (
+                          <CompactApplicationCard
+                            application={application}
+                            index={index}
+                            isGhosted={isGhosted(application)}
+                          />
+                        ) : (
+                          <ApplicationCard
+                            application={application}
+                            index={index}
+                            isGhosted={isGhosted(application)}
+                            onUpdate={(updatedApp) => {
+                              setApplications(prev =>
+                                prev.map(app => app.id === updatedApp.id ? updatedApp : app)
+                              );
+                            }}
+                          />
+                        )}
                       </div>
                     ))}
                     {provided.placeholder}

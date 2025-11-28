@@ -6,7 +6,10 @@ import KanbanBoard from '@/components/kanban/KanbanBoard';
 import ApplicationForm from '@/components/forms/ApplicationForm';
 import UserMenu from '@/components/auth/UserMenu';
 import MobileNav from '@/components/nav/MobileNav';
+import ApplicationTable from '@/components/application/ApplicationTable';
+import { Button } from '@/components/ui/button';
 import { Application } from '@prisma/client';
+import { LayoutList, Kanban } from 'lucide-react';
 
 interface DashboardClientProps {
   initialApplications: Application[];
@@ -15,6 +18,7 @@ interface DashboardClientProps {
 const DashboardClient: React.FC<DashboardClientProps> = ({ initialApplications }) => {
   const [applications, setApplications] = useState<Application[]>(initialApplications);
   const [showForm, setShowForm] = useState(false);
+  const [viewMode, setViewMode] = useState<'kanban' | 'table'>('kanban'); // Default to kanban view
 
   const refreshApplications = async () => {
     try {
@@ -40,6 +44,12 @@ const DashboardClient: React.FC<DashboardClientProps> = ({ initialApplications }
     };
   }, []);
 
+  const handleApplicationUpdate = (updatedApplication: Application) => {
+    setApplications(prev =>
+      prev.map(app => app.id === updatedApplication.id ? updatedApplication : app)
+    );
+  };
+
   return (
     <div>
       {/* Mobile Header */}
@@ -58,12 +68,44 @@ const DashboardClient: React.FC<DashboardClientProps> = ({ initialApplications }
             <h1 className="text-xl font-bold md:hidden">Applications</h1>
             <p className="text-sm text-gray-500">{applications.length} applications</p>
           </div>
-          <div className="flex items-center space-x-2 w-full sm:w-auto">
+          <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+            <div className="flex border rounded-md overflow-hidden">
+              <Button
+                variant={viewMode === 'kanban' ? 'default' : 'outline'}
+                size="sm"
+                className="px-3 py-1.5 text-xs"
+                onClick={() => setViewMode('kanban')}
+              >
+                <Kanban className="h-4 w-4 mr-1" />
+                Kanban
+              </Button>
+              <Button
+                variant={viewMode === 'table' ? 'default' : 'outline'}
+                size="sm"
+                className="px-3 py-1.5 text-xs"
+                onClick={() => setViewMode('table')}
+              >
+                <LayoutList className="h-4 w-4 mr-1" />
+                Table
+              </Button>
+            </div>
             <ApplicationForm onApplicationCreated={refreshApplications} open={showForm} onOpenChange={setShowForm} />
             <UserMenu />
           </div>
         </div>
-        <KanbanBoard initialApplications={applications} />
+
+        {viewMode === 'kanban' ? (
+          <KanbanBoard
+            initialApplications={applications}
+            onUpdate={handleApplicationUpdate}
+            compactView={applications.length > 20} // Use compact view when more than 20 applications
+          />
+        ) : (
+          <ApplicationTable
+            applications={applications}
+            onUpdate={handleApplicationUpdate}
+          />
+        )}
       </div>
     </div>
   );
