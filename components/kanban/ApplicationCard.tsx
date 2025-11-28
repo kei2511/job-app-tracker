@@ -11,9 +11,10 @@ interface ApplicationCardProps {
   application: Application;
   index: number;
   isGhosted: boolean;
+  onUpdate?: (updatedApplication: Application) => void;
 }
 
-const ApplicationCard: React.FC<ApplicationCardProps> = ({ application, index, isGhosted }) => {
+const ApplicationCard: React.FC<ApplicationCardProps> = ({ application, index, isGhosted, onUpdate }) => {
   const [detailOpen, setDetailOpen] = useState(false);
   const daysSinceApplied = getDaysSinceApplied(application.date_applied);
   
@@ -62,10 +63,11 @@ const ApplicationCard: React.FC<ApplicationCardProps> = ({ application, index, i
           </div>
         )}
       </Draggable>
-      <ApplicationDetail 
-        application={application} 
-        open={detailOpen} 
-        onOpenChange={setDetailOpen} 
+      <ApplicationDetail
+        application={application}
+        open={detailOpen}
+        onOpenChange={setDetailOpen}
+        onUpdate={onUpdate}
       />
     </>
   );

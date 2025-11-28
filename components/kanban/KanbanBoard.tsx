@@ -103,6 +103,11 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ initialApplications }) => {
                           application={application}
                           index={index}
                           isGhosted={isGhosted(application)}
+                          onUpdate={(updatedApp) => {
+                            setApplications(prev =>
+                              prev.map(app => app.id === updatedApp.id ? updatedApp : app)
+                            );
+                          }}
                         />
                       </div>
                     ))}
