@@ -19,12 +19,14 @@ interface ApplicationDetailProps {
   application: Application | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onUpdate?: (updatedApplication: Application) => void;
 }
 
-const ApplicationDetail: React.FC<ApplicationDetailProps> = ({ 
-  application, 
-  open, 
-  onOpenChange 
+const ApplicationDetail: React.FC<ApplicationDetailProps> = ({
+  application,
+  open,
+  onOpenChange,
+  onUpdate
 }) => {
   const router = useRouter();
   
@@ -45,9 +47,33 @@ const ApplicationDetail: React.FC<ApplicationDetailProps> = ({
 
   const updateStatus = async (newStatus: string) => {
     if (application && application.id) {
-      await updateApplication(application.id, { ...application, status: newStatus });
-      onOpenChange(false); // Close the dialog after updating
-      router.refresh(); // Refresh the page to show updates
+      // Optimistically update the local application data
+      const updatedApplication = {
+        ...application,
+        status: newStatus as any, // Type assertion to match the enum type
+        last_updated: new Date()
+      };
+
+      // Close the dialog first
+      onOpenChange(false);
+
+      // Call the parent's update function if provided
+      if (onUpdate) {
+        onUpdate(updatedApplication);
+      }
+
+      try {
+        // Update the application in the database
+        const result = await updateApplication(application.id, { ...application, status: newStatus });
+
+        if (!result.success) {
+          console.error('Failed to update application status:', result.error);
+          // In a real app, you might want to notify the user or revert the optimistic update
+        }
+      } catch (error) {
+        console.error('Error updating application status:', error);
+        // In a real app, you might want to notify the user or revert the optimistic update
+      }
     }
   };
 
