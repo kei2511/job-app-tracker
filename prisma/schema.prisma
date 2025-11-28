@@ -16,8 +16,9 @@ model User {
   password String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-  
+
   applications Application[]
+  tags         Tag[]
 }
 
 model Application {
@@ -35,12 +36,52 @@ model Application {
   notes             String?
   date_applied      DateTime @default(now())
   last_updated      DateTime @updatedAt
+  reminder_date     DateTime?
+  priority          Priority @default(MEDIUM)
+  is_bookmarked     Boolean  @default(false)
   is_reminder_sent  Boolean  @default(false)
   created_at        DateTime @default(now())
   userId            String
   user              User     @relation(fields: [userId], references: [id])
-  
+  applicationNotes  ApplicationNote[]
+  applicationTags   ApplicationTag[]
+
   @@map("applications")
+}
+
+model ApplicationNote {
+  id             String   @id @default(cuid())
+  content        String
+  created_at     DateTime @default(now())
+  applicationId  String
+  application    Application @relation(fields: [applicationId], references: [id])
+}
+
+model Tag {
+  id              String   @id @default(cuid())
+  name            String
+  color           String?  // For UI styling
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  applicationTags ApplicationTag[]
+
+  @@unique([name, userId]) // Each user can have unique tags with same name
+}
+
+model ApplicationTag {
+  id            String   @id @default(cuid())
+  applicationId String
+  tagId         String
+  application   Application @relation(fields: [applicationId], references: [id])
+  tag           Tag       @relation(fields: [tagId], references: [id])
+
+  @@unique([applicationId, tagId])
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
 }
 
 enum ContractType {

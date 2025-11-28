@@ -7,6 +7,9 @@ import ApplicationForm from '@/components/forms/ApplicationForm';
 import UserMenu from '@/components/auth/UserMenu';
 import MobileNav from '@/components/nav/MobileNav';
 import ApplicationTable from '@/components/application/ApplicationTable';
+import ExportButton from '@/components/application/ExportButton';
+import ReminderNotification from '@/components/application/ReminderNotification';
+import ApplicationStatistics from '@/components/application/ApplicationStatistics';
 import { Button } from '@/components/ui/button';
 import { Application } from '@prisma/client';
 import { LayoutList, Kanban } from 'lucide-react';
@@ -89,6 +92,7 @@ const DashboardClient: React.FC<DashboardClientProps> = ({ initialApplications }
                 Table
               </Button>
             </div>
+            <ExportButton />
             <ApplicationForm onApplicationCreated={refreshApplications} open={showForm} onOpenChange={setShowForm} />
             <UserMenu />
           </div>
@@ -106,7 +110,15 @@ const DashboardClient: React.FC<DashboardClientProps> = ({ initialApplications }
             onUpdate={handleApplicationUpdate}
           />
         )}
+
+        {/* Statistics Section - shown when in table view */}
+        {viewMode === 'table' && applications.length > 0 && (
+          <ApplicationStatistics applications={applications} />
+        )}
       </div>
+
+      {/* Reminder Notification */}
+      <ReminderNotification applications={applications} />
     </div>
   );
 };

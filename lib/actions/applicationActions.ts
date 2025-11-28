@@ -10,7 +10,7 @@ import { authOptions } from '@/lib/auth';
 export async function createApplication(data: any) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session) {
       return { success: false, error: 'User not authenticated' };
     }
@@ -25,9 +25,10 @@ export async function createApplication(data: any) {
         ...data,
         userId,
         date_applied: data.date_applied ? new Date(data.date_applied) : new Date(),
+        reminder_date: data.reminder_date ? new Date(data.reminder_date) : null,
       },
     });
-    
+
     revalidatePath('/dashboard');
     return { success: true, data: application };
   } catch (error) {
@@ -54,6 +55,11 @@ export async function updateApplication(id: string, data: any) {
     const updatedData: any = { ...data };
     if (data.status) {
       updatedData.last_updated = new Date();
+    }
+
+    // Handle reminder_date conversion
+    if (data.reminder_date !== undefined) {
+      updatedData.reminder_date = data.reminder_date ? new Date(data.reminder_date) : null;
     }
 
     // Update with user validation in a single query

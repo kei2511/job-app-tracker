@@ -46,10 +46,26 @@ const CompactApplicationCard: React.FC<ApplicationCardProps> = ({ application, i
             `}
             onClick={() => setDetailOpen(true)}
           >
-            <div className="font-medium truncate">{truncateText(application.position, 30)}</div>
-            <div className="text-gray-600 truncate">{truncateText(application.company_name, 25)}</div>
-            <div className="text-gray-500 mt-1">
-              {application.date_applied ? new Date(application.date_applied).toLocaleDateString() : ''}
+            <div className="flex items-center gap-1">
+              {application.is_bookmarked && (
+                <span className="text-yellow-500 text-xs">★</span>
+              )}
+              <div className="font-medium truncate">{truncateText(application.position, 25)}</div>
+            </div>
+            <div className="text-gray-600 truncate text-xs">{truncateText(application.company_name, 20)}</div>
+            <div className="flex items-center gap-1 mt-1">
+              {application.priority === 'HIGH' && (
+                <span className="w-1.5 h-1.5 rounded-full bg-red-500" title="High Priority"></span>
+              )}
+              {application.priority === 'MEDIUM' && (
+                <span className="w-1.5 h-1.5 rounded-full bg-yellow-500" title="Medium Priority"></span>
+              )}
+              {application.priority === 'LOW' && (
+                <span className="w-1.5 h-1.5 rounded-full bg-green-500" title="Low Priority"></span>
+              )}
+              <div className="text-gray-500 text-xs">
+                {application.date_applied ? new Date(application.date_applied).toLocaleDateString() : ''}
+              </div>
             </div>
             {daysSinceApplied >= 14 && application.status === 'APPLIED' && !application.is_reminder_sent && (
               <div className="text-red-500 font-medium text-xs mt-1">⚠️ {daysSinceApplied} days</div>

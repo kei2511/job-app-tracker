@@ -42,8 +42,24 @@ const ApplicationCard: React.FC<ApplicationCardProps> = ({ application, index, i
           >
             <div className="flex justify-between items-start">
               <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-base truncate">{application.position}</h3>
+                <div className="flex items-center gap-1">
+                  {application.is_bookmarked && (
+                    <span className="text-yellow-500">★</span>
+                  )}
+                  <h3 className="font-bold text-base truncate">{application.position}</h3>
+                </div>
                 <p className="text-gray-600 truncate text-sm">{application.company_name}</p>
+                <div className="flex items-center gap-1 mt-1">
+                  {application.priority === 'HIGH' && (
+                    <span className="w-2 h-2 rounded-full bg-red-500" title="High Priority"></span>
+                  )}
+                  {application.priority === 'MEDIUM' && (
+                    <span className="w-2 h-2 rounded-full bg-yellow-500" title="Medium Priority"></span>
+                  )}
+                  {application.priority === 'LOW' && (
+                    <span className="w-2 h-2 rounded-full bg-green-500" title="Low Priority"></span>
+                  )}
+                </div>
               </div>
               {isGhosted && (
                 <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full ml-2 flex-shrink-0">

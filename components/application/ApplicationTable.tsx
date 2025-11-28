@@ -128,7 +128,7 @@ const ApplicationTable: React.FC<ApplicationTableProps> = ({ applications, onUpd
               <TableHead className="w-[200px]">Company</TableHead>
               <TableHead>Platform</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Date Applied</TableHead>
+              <TableHead className="w-[150px]">Priority & Date</TableHead>
               <TableHead>Location</TableHead>
               <TableHead>Salary</TableHead>
             </TableRow>
@@ -148,7 +148,12 @@ const ApplicationTable: React.FC<ApplicationTableProps> = ({ applications, onUpd
                   onClick={() => handleOpenDetail(application)}
                 >
                   <TableCell className="font-medium">
-                    <div className="truncate max-w-xs">{application.position}</div>
+                    <div className="flex items-center gap-2">
+                      {application.is_bookmarked && (
+                        <span className="text-yellow-500" title="Bookmarked">★</span>
+                      )}
+                      <span className="truncate max-w-[200px]">{application.position}</span>
+                    </div>
                   </TableCell>
                   <TableCell>
                     <div className="truncate max-w-xs">{application.company_name}</div>
@@ -162,7 +167,18 @@ const ApplicationTable: React.FC<ApplicationTableProps> = ({ applications, onUpd
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    {application.date_applied ? formatDate(application.date_applied) : '-'}
+                    <div className="flex items-center gap-1.5">
+                      {application.priority === 'HIGH' && (
+                        <span className="w-2 h-2 rounded-full bg-red-500" title="High Priority"></span>
+                      )}
+                      {application.priority === 'MEDIUM' && (
+                        <span className="w-2 h-2 rounded-full bg-yellow-500" title="Medium Priority"></span>
+                      )}
+                      {application.priority === 'LOW' && (
+                        <span className="w-2 h-2 rounded-full bg-green-500" title="Low Priority"></span>
+                      )}
+                      <span>{application.date_applied ? formatDate(application.date_applied) : '-'}</span>
+                    </div>
                   </TableCell>
                   <TableCell>
                     <div className="truncate max-w-[100px]">{application.location || '-'}</div>

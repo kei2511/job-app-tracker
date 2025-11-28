@@ -2,11 +2,11 @@
 'use client';
 
 import React from 'react';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,6 +14,9 @@ import { formatDate } from '@/lib/dateUtils';
 import { Application } from '@prisma/client';
 import { updateApplication } from '@/lib/actions/applicationActions';
 import { useRouter } from 'next/navigation';
+import PriorityBookmarkControls from '@/components/application/PriorityBookmarkControls';
+import ApplicationNotes from '@/components/application/ApplicationNotes';
+import ApplicationTags from '@/components/application/ApplicationTags';
 
 interface ApplicationDetailProps {
   application: Application | null;
@@ -64,7 +67,13 @@ const ApplicationDetail: React.FC<ApplicationDetailProps> = ({
 
       try {
         // Update the application in the database
-        const result = await updateApplication(application.id, { ...application, status: newStatus });
+        const result = await updateApplication(application.id, {
+          ...application,
+          status: newStatus,
+          // Preserve existing priority and bookmark values
+          priority: application.priority,
+          is_bookmarked: application.is_bookmarked
+        });
 
         if (!result.success) {
           console.error('Failed to update application status:', result.error);
@@ -144,6 +153,40 @@ const ApplicationDetail: React.FC<ApplicationDetailProps> = ({
             <h3 className="font-medium text-gray-500 text-sm">Notes</h3>
             <p className="whitespace-pre-line text-sm">{application.notes || '-'}</p>
           </div>
+
+          <div>
+            <h3 className="font-medium text-gray-500 text-sm">Reminder Date</h3>
+            <div className="flex items-center gap-2">
+              <p className="text-sm">
+                {application.reminder_date
+                  ? new Date(application.reminder_date).toLocaleDateString()
+                  : '-'}
+              </p>
+            </div>
+          </div>
+
+          {/* Priority and Bookmark Controls */}
+          <PriorityBookmarkControls
+            application={application}
+            onUpdate={(updatedApp) => {
+              // Update the local application state through parent
+              if (onUpdate) {
+                onUpdate(updatedApp);
+              }
+            }}
+          />
+
+          {/* Additional Notes Section */}
+          <ApplicationNotes
+            application={application}
+            onUpdate={onUpdate}
+          />
+
+          {/* Application Tags/Categories Section */}
+          <ApplicationTags
+            application={application}
+            onUpdate={onUpdate}
+          />
           
           <div className="pt-4 border-t">
             <h3 className="font-medium text-gray-500 mb-2 text-sm">Update Status</h3>

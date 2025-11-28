@@ -38,6 +38,7 @@ const applicationSchema = z.object({
   cv_version: z.string().optional(),
   notes: z.string().optional(),
   date_applied: z.string().optional(),
+  reminder_date: z.string().optional(),
   status: z.string().optional().default('APPLIED'), // Default status is APPLIED
 });
 
@@ -85,9 +86,16 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({
 
   const onSubmit = async (data: ApplicationFormValues) => {
     setIsSubmitting(true);
-    
+
     try {
-      const result = await createApplication(data);
+      // Prepare the data, handling date fields
+      const processedData = {
+        ...data,
+        date_applied: data.date_applied ? new Date(data.date_applied) : undefined,
+        reminder_date: data.reminder_date ? new Date(data.reminder_date) : undefined
+      };
+
+      const result = await createApplication(processedData);
       if (result.success) {
         reset();
         setOpen(false);
@@ -254,14 +262,26 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({
               />
             </div>
 
-            <div className="space-y-1.5">
-              <Label htmlFor="date_applied" className="text-sm">Date Applied</Label>
-              <Input
-                id="date_applied"
-                type="date"
-                {...register('date_applied')}
-                className="text-sm"
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="date_applied" className="text-sm">Date Applied</Label>
+                <Input
+                  id="date_applied"
+                  type="date"
+                  {...register('date_applied')}
+                  className="text-sm"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="reminder_date" className="text-sm">Reminder Date</Label>
+                <Input
+                  id="reminder_date"
+                  type="date"
+                  {...register('reminder_date')}
+                  className="text-sm"
+                />
+              </div>
             </div>
 
             <div className="space-y-1.5">
