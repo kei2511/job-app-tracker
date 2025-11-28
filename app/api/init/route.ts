@@ -5,6 +5,17 @@ import { NextRequest } from 'next/server';
 
 export async function GET(request: NextRequest) {
   try {
+    // Skip init during build if database is not accessible
+    if (!process.env.DATABASE_URL) {
+      return new Response(
+        JSON.stringify({ message: 'Database not configured' }),
+        { 
+          status: 503, 
+          headers: { 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
     // Create default users if they don't exist
     const adminUser = await db.user.upsert({
       where: { username: 'admin' },
