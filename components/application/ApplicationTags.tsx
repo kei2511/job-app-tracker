@@ -153,7 +153,7 @@ const ApplicationTags: React.FC<ApplicationTagsProps> = ({ application, onUpdate
                   <Badge 
                     key={tag.id} 
                     variant="secondary"
-                    style={{ backgroundColor: `${tag.color}20`, color: tag.color }} // Add transparency to bg
+                    style={{ backgroundColor: tag.color ? `${tag.color}20` : '#3b82f620', color: tag.color || '#3b82f6' }} // Add transparency to bg
                     className="flex items-center gap-1"
                   >
                     {tag.name}
