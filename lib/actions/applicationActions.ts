@@ -139,7 +139,7 @@ export async function updateApplicationStatus(id: string, status: string) {
     const updatedApplication = await db.application.update({
       where: { id },
       data: {
-        status,
+        status: status as any,
         last_updated: new Date(),
       },
     });
