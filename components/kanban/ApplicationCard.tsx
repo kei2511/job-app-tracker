@@ -40,22 +40,24 @@ const ApplicationCard: React.FC<ApplicationCardProps> = ({ application, index, i
             onClick={() => setDetailOpen(true)}
           >
             <div className="flex justify-between items-start">
-              <h3 className="font-bold text-lg truncate">{application.position}</h3>
+              <div className="flex-1 min-w-0">
+                <h3 className="font-bold text-base truncate">{application.position}</h3>
+                <p className="text-gray-600 truncate text-sm">{application.company_name}</p>
+              </div>
               {isGhosted && (
-                <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">
-                  ⚠️ Check Status
+                <span className="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full ml-2 flex-shrink-0">
+                  ⚠️ Check
                 </span>
               )}
             </div>
-            <p className="text-gray-600 truncate">{application.company_name}</p>
-            <div className="mt-2 text-sm text-gray-500">
+            <div className="mt-2 text-xs text-gray-500">
               <p>Applied: {new Date(application.date_applied).toLocaleDateString()}</p>
               {daysSinceApplied >= 14 && application.status === 'APPLIED' && !application.is_reminder_sent && (
                 <p className="text-red-500 font-medium">⚠️ {daysSinceApplied} days - No response</p>
               )}
             </div>
             {application.notes && (
-              <p className="mt-2 text-sm text-gray-700 line-clamp-2">{application.notes}</p>
+              <p className="mt-1 text-xs text-gray-700 line-clamp-2">{application.notes}</p>
             )}
           </div>
         )}

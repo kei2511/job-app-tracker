@@ -68,10 +68,10 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ initialApplications }) => {
       />
       
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-6">
           {groupedApplications.map((column) => (
-            <div key={column.id} className="bg-gray-100 p-4 rounded-lg">
-              <h2 className={`font-bold text-center py-2 rounded-t ${column.color}`}>
+            <div key={column.id} className="bg-gray-100 p-3 rounded-lg min-w-[280px]">
+              <h2 className={`font-bold text-center py-2 rounded-t ${column.color} text-sm sm:text-base`}>
                 {column.title} ({column.applications.length})
               </h2>
               <Droppable droppableId={column.id}>
@@ -79,13 +79,13 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ initialApplications }) => {
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className="min-h-[200px] p-2"
+                    className="min-h-[150px] p-2"
                   >
                     {column.applications.map((application, index) => (
                       <div key={application.id} className="mb-2">
-                        <ApplicationCard 
-                          application={application} 
-                          index={index} 
+                        <ApplicationCard
+                          application={application}
+                          index={index}
                           isGhosted={isGhosted(application)}
                         />
                       </div>

@@ -67,68 +67,68 @@ const ApplicationDetail: React.FC<ApplicationDetailProps> = ({
         </DialogHeader>
         
         <div className="space-y-4 py-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <h3 className="font-medium text-gray-500">Platform</h3>
-              <p>{application.platform || '-'}</p>
+              <h3 className="font-medium text-gray-500 text-sm">Platform</h3>
+              <p className="text-sm">{application.platform || '-'}</p>
             </div>
             <div>
-              <h3 className="font-medium text-gray-500">Date Applied</h3>
-              <p>{application.date_applied ? formatDate(application.date_applied) : '-'}</p>
+              <h3 className="font-medium text-gray-500 text-sm">Date Applied</h3>
+              <p className="text-sm">{application.date_applied ? formatDate(application.date_applied) : '-'}</p>
             </div>
             <div>
-              <h3 className="font-medium text-gray-500">Contract Type</h3>
-              <p>{application.contract_type || '-'}</p>
+              <h3 className="font-medium text-gray-500 text-sm">Contract Type</h3>
+              <p className="text-sm">{application.contract_type || '-'}</p>
             </div>
             <div>
-              <h3 className="font-medium text-gray-500">Work Model</h3>
-              <p>{application.work_model || '-'}</p>
+              <h3 className="font-medium text-gray-500 text-sm">Work Model</h3>
+              <p className="text-sm">{application.work_model || '-'}</p>
             </div>
             <div>
-              <h3 className="font-medium text-gray-500">Location</h3>
-              <p>{application.location || '-'}</p>
+              <h3 className="font-medium text-gray-500 text-sm">Location</h3>
+              <p className="text-sm">{application.location || '-'}</p>
             </div>
             <div>
-              <h3 className="font-medium text-gray-500">Salary Expectation</h3>
-              <p>{application.salary_expectation ? `Rp ${application.salary_expectation}` : '-'}</p>
+              <h3 className="font-medium text-gray-500 text-sm">Salary Expectation</h3>
+              <p className="text-sm">{application.salary_expectation ? `Rp ${application.salary_expectation}` : '-'}</p>
             </div>
-            <div className="col-span-2">
-              <h3 className="font-medium text-gray-500">Job Link</h3>
+            <div className="sm:col-span-2">
+              <h3 className="font-medium text-gray-500 text-sm">Job Link</h3>
               {application.job_link ? (
-                <a 
-                  href={application.job_link} 
-                  target="_blank" 
+                <a
+                  href={application.job_link}
+                  target="_blank"
                   rel="noopener noreferrer"
-                  className="text-blue-500 hover:underline"
+                  className="text-blue-500 hover:underline text-sm break-all"
                 >
                   {application.job_link}
                 </a>
               ) : (
-                <p>-</p>
+                <p className="text-sm">-</p>
               )}
             </div>
           </div>
           
           <div>
-            <h3 className="font-medium text-gray-500">CV Version</h3>
-            <p>{application.cv_version || '-'}</p>
+            <h3 className="font-medium text-gray-500 text-sm">CV Version</h3>
+            <p className="text-sm">{application.cv_version || '-'}</p>
           </div>
-          
+
           <div>
-            <h3 className="font-medium text-gray-500">Notes</h3>
-            <p className="whitespace-pre-line">{application.notes || '-'}</p>
+            <h3 className="font-medium text-gray-500 text-sm">Notes</h3>
+            <p className="whitespace-pre-line text-sm">{application.notes || '-'}</p>
           </div>
           
           <div className="pt-4 border-t">
-            <h3 className="font-medium text-gray-500 mb-2">Update Status</h3>
-            <div className="flex flex-wrap gap-2">
+            <h3 className="font-medium text-gray-500 mb-2 text-sm">Update Status</h3>
+            <div className="flex flex-wrap gap-1.5">
               {['WISHLIST', 'APPLIED', 'SCREENING', 'INTERVIEW_HR', 'INTERVIEW_USER', 'OFFERING', 'REJECTED', 'GHOSTED'].map((status) => (
                 <Button
                   key={status}
                   variant={application.status === status ? "default" : "outline"}
                   size="sm"
                   onClick={() => updateStatus(status)}
-                  className={getStatusColor(status)}
+                  className={getStatusColor(status) + " text-xs py-1.5 px-2"}
                 >
                   {status.replace('_', ' ')}
                 </Button>
