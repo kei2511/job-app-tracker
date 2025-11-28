@@ -40,7 +40,7 @@ export async function createApplication(data: any) {
 export async function updateApplication(id: string, data: any) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session) {
       return { success: false, error: 'User not authenticated' };
     }
@@ -48,15 +48,6 @@ export async function updateApplication(id: string, data: any) {
     const userId = session.user?.id;
     if (!userId) {
       return { success: false, error: 'User not authenticated' };
-    }
-
-    // Verify that the application belongs to the current user
-    const application = await db.application.findUnique({
-      where: { id }
-    });
-
-    if (application?.userId !== userId) {
-      return { success: false, error: 'Unauthorized' };
     }
 
     // Check if status changed to update last_updated
@@ -64,17 +55,21 @@ export async function updateApplication(id: string, data: any) {
     if (data.status) {
       updatedData.last_updated = new Date();
     }
-    
+
+    // Update with user validation in a single query
     const updatedApplication = await db.application.update({
-      where: { id },
+      where: {
+        id,
+        userId
+      },
       data: updatedData,
     });
-    
+
     revalidatePath('/dashboard');
     return { success: true, data: updatedApplication };
   } catch (error) {
     console.error('Error updating application:', error);
-    return { success: false, error: 'Failed to update application' };
+    return { success: false, error: 'Application not found or unauthorized' };
   }
 }
 
@@ -82,7 +77,7 @@ export async function updateApplication(id: string, data: any) {
 export async function deleteApplication(id: string) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session) {
       return { success: false, error: 'User not authenticated' };
     }
@@ -92,24 +87,18 @@ export async function deleteApplication(id: string) {
       return { success: false, error: 'User not authenticated' };
     }
 
-    // Verify that the application belongs to the current user
-    const application = await db.application.findUnique({
-      where: { id }
-    });
-
-    if (application?.userId !== userId) {
-      return { success: false, error: 'Unauthorized' };
-    }
-
     await db.application.delete({
-      where: { id },
+      where: {
+        id,
+        userId
+      },
     });
-    
+
     revalidatePath('/dashboard');
     return { success: true };
   } catch (error) {
     console.error('Error deleting application:', error);
-    return { success: false, error: 'Failed to delete application' };
+    return { success: false, error: 'Application not found or unauthorized' };
   }
 }
 
@@ -117,7 +106,7 @@ export async function deleteApplication(id: string) {
 export async function updateApplicationStatus(id: string, status: string) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session) {
       return { success: false, error: 'User not authenticated' };
     }
@@ -127,28 +116,22 @@ export async function updateApplicationStatus(id: string, status: string) {
       return { success: false, error: 'User not authenticated' };
     }
 
-    // Verify that the application belongs to the current user
-    const application = await db.application.findUnique({
-      where: { id }
-    });
-
-    if (application?.userId !== userId) {
-      return { success: false, error: 'Unauthorized' };
-    }
-
     const updatedApplication = await db.application.update({
-      where: { id },
+      where: {
+        id,
+        userId
+      },
       data: {
         status: status as any,
         last_updated: new Date(),
       },
     });
-    
+
     revalidatePath('/dashboard');
     return { success: true, data: updatedApplication };
   } catch (error) {
     console.error('Error updating application status:', error);
-    return { success: false, error: 'Failed to update application status' };
+    return { success: false, error: 'Application not found or unauthorized' };
   }
 }
 
@@ -156,32 +139,31 @@ export async function updateApplicationStatus(id: string, status: string) {
 export async function markReminderSent(id: string) {
   try {
     const session = await getServerSession(authOptions);
-    
+
     if (!session) {
       return { success: false, error: 'User not authenticated' };
     }
-    
-    // Verify that the application belongs to the current user
-    const application = await db.application.findUnique({
-      where: { id }
-    });
-    
-    if (application?.userId !== session.user.id) {
-      return { success: false, error: 'Unauthorized' };
+
+    const userId = session.user?.id;
+    if (!userId) {
+      return { success: false, error: 'User not authenticated' };
     }
 
     const updatedApplication = await db.application.update({
-      where: { id },
+      where: {
+        id,
+        userId
+      },
       data: {
         is_reminder_sent: true,
         last_updated: new Date(),
       },
     });
-    
+
     revalidatePath('/dashboard');
     return { success: true, data: updatedApplication };
   } catch (error) {
     console.error('Error marking reminder as sent:', error);
-    return { success: false, error: 'Failed to mark reminder as sent' };
+    return { success: false, error: 'Application not found or unauthorized' };
   }
 }

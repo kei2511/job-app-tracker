@@ -28,7 +28,7 @@ export async function GET(
 
     const { id } = params;
     const application = await db.application.findFirst({
-      where: { 
+      where: {
         id,
         userId
       },
@@ -79,31 +79,30 @@ export async function PUT(
     const { id } = params;
     const data = await request.json();
 
-    // Verify that the application belongs to the current user
-    const application = await db.application.findUnique({
-      where: { id }
-    });
-    
-    if (application?.userId !== userId) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 403,
+    // Verify that the application belongs to the current user in a single query
+    try {
+      const updatedApplication = await db.application.update({
+        where: {
+          id,
+          userId
+        },
+        data: {
+          ...data,
+          last_updated: new Date(),
+        },
+      });
+
+      return new Response(JSON.stringify(updatedApplication), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    } catch (error) {
+      // If update fails, it means the application doesn't exist or doesn't belong to the user
+      return new Response(JSON.stringify({ error: 'Application not found or unauthorized' }), {
+        status: 404,
         headers: { 'Content-Type': 'application/json' },
       });
     }
-
-    // Update last_updated timestamp
-    const updatedApplication = await db.application.update({
-      where: { id },
-      data: {
-        ...data,
-        last_updated: new Date(),
-      },
-    });
-
-    return new Response(JSON.stringify(updatedApplication), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
   } catch (error) {
     console.error('Error updating application:', error);
     return new Response(JSON.stringify({ error: 'Failed to update application' }), {
@@ -137,26 +136,26 @@ export async function DELETE(
 
     const { id } = params;
 
-    // Verify that the application belongs to the current user
-    const application = await db.application.findUnique({
-      where: { id }
-    });
+    // Delete the application if it belongs to the current user in a single query
+    try {
+      await db.application.delete({
+        where: {
+          id,
+          userId
+        },
+      });
 
-    if (application?.userId !== userId) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 403,
+      return new Response(JSON.stringify({ message: 'Application deleted successfully' }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    } catch (error) {
+      // If delete fails, it means the application doesn't exist or doesn't belong to the user
+      return new Response(JSON.stringify({ error: 'Application not found or unauthorized' }), {
+        status: 404,
         headers: { 'Content-Type': 'application/json' },
       });
     }
-
-    await db.application.delete({
-      where: { id },
-    });
-
-    return new Response(JSON.stringify({ message: 'Application deleted successfully' }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
   } catch (error) {
     console.error('Error deleting application:', error);
     return new Response(JSON.stringify({ error: 'Failed to delete application' }), {
