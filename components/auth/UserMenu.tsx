@@ -12,9 +12,10 @@ export default function UserMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="flex items-center">
+        <Button variant="outline" size="sm" className="flex items-center text-sm py-2 px-3">
           <User className="h-4 w-4 mr-2" />
-          {session?.user?.username}
+          <span className="hidden md:inline">{session?.user?.username}</span>
+          <span className="md:hidden">Profile</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">

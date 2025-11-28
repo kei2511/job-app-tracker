@@ -17,16 +17,19 @@ const GhostingReminder: React.FC<GhostingReminderProps> = ({ applications }) => 
 
   useEffect(() => {
     const checkForGhostedApplications = () => {
-      applications.forEach(application => {
-        if (isGhosted(application) && !remindedApplications.has(application.id)) {
-          // Set the notification data and show it
-          setNotificationApp(application);
-          setShowNotification(true);
-          
-          // Add to reminded set to prevent duplicate notifications
-          setRemindedApplications(prev => new Set(prev).add(application.id));
-        }
-      });
+      // Only show notification for applications that haven't been reminded yet
+      const unremindedGhostedApps = applications.filter(application =>
+        isGhosted(application) && !remindedApplications.has(application.id)
+      );
+
+      if (unremindedGhostedApps.length > 0) {
+        // Show notification for the first unreminded ghosted application
+        setNotificationApp(unremindedGhostedApps[0]);
+        setShowNotification(true);
+
+        // Add to reminded set to prevent duplicate notifications
+        setRemindedApplications(prev => new Set(prev).add(unremindedGhostedApps[0].id));
+      }
     };
 
     checkForGhostedApplications();
@@ -72,31 +75,31 @@ const GhostingReminder: React.FC<GhostingReminderProps> = ({ applications }) => 
   if (!showNotification || !notificationApp) return null;
 
   return (
-    <div className="fixed top-4 right-4 z-50 bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded shadow-lg max-w-sm">
+    <div className="fixed top-4 left-4 right-4 z-50 bg-yellow-100 border border-yellow-400 text-yellow-700 px-3 py-2.5 rounded-lg shadow-lg max-w-[calc(100vw-32px)]">
       <div className="flex justify-between items-start">
-        <div>
-          <p className="font-bold">Reminder: Follow up!</p>
-          <p className="text-sm mt-1">
+        <div className="flex-1 min-w-0">
+          <p className="font-bold text-sm">Reminder: Follow up!</p>
+          <p className="text-xs mt-1">
             You haven't heard back from <strong>{notificationApp.company_name}</strong> in 2 weeks. Follow up or mark as Ghosted.
           </p>
         </div>
-        <button 
+        <button
           onClick={() => setShowNotification(false)}
-          className="text-yellow-700 hover:text-yellow-900 ml-2"
+          className="text-yellow-700 hover:text-yellow-900 ml-2 flex-shrink-0 text-sm"
         >
           ✕
         </button>
       </div>
-      <div className="flex mt-2 space-x-2">
+      <div className="flex mt-2 space-x-1.5">
         <button
           onClick={handleMarkAsGhosted}
-          className="bg-red-500 hover:bg-red-600 text-white text-xs px-2 py-1 rounded"
+          className="bg-red-500 hover:bg-red-600 text-white text-xs px-2.5 py-1.5 rounded flex-1 min-w-[80px]"
         >
           Mark as Ghosted
         </button>
         <button
           onClick={handleDismiss}
-          className="bg-gray-500 hover:bg-gray-600 text-white text-xs px-2 py-1 rounded"
+          className="bg-gray-500 hover:bg-gray-600 text-white text-xs px-2.5 py-1.5 rounded flex-1 min-w-[60px]"
         >
           Dismiss
         </button>

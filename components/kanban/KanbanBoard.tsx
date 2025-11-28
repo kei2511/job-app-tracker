@@ -34,18 +34,34 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ initialApplications }) => {
     if (!destination) return;
     if (destination.droppableId === source.droppableId && destination.index === source.index) return;
 
-    const updatedApplication = applications.find(app => app.id === draggableId);
-    if (!updatedApplication) return;
+    const movedApplication = applications.find(app => app.id === draggableId);
+    if (!movedApplication) return;
+
+    // Optimistically update the UI
+    const updatedAppsOptimistic = applications.map(app =>
+      app.id === draggableId ? { ...app, status: destination.droppableId as any, last_updated: new Date() } : app
+    );
+    setApplications(updatedAppsOptimistic);
 
     // Update the status in the database
-    const statusChange = await updateApplicationStatus(draggableId, destination.droppableId);
+    try {
+      const statusChange = await updateApplicationStatus(draggableId, destination.droppableId);
 
-    if (statusChange.success) {
-      // Update the local state
-      const updatedApps = applications.map(app =>
-        app.id === draggableId ? { ...app, status: destination.droppableId as any, last_updated: new Date() } : app
+      if (!statusChange.success) {
+        // If server update fails, revert the optimistic update
+        const revertedApps = applications.map(app =>
+          app.id === draggableId ? movedApplication : app
+        );
+        setApplications(revertedApps);
+        console.error('Failed to update application status:', statusChange.error);
+      }
+    } catch (error) {
+      // If server update fails, revert the optimistic update
+      const revertedApps = applications.map(app =>
+        app.id === draggableId ? movedApplication : app
       );
-      setApplications(updatedApps);
+      setApplications(revertedApps);
+      console.error('Error updating application status:', error);
     }
   };
 
@@ -68,10 +84,10 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ initialApplications }) => {
       />
       
       <DragDropContext onDragEnd={onDragEnd}>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mt-6">
           {groupedApplications.map((column) => (
-            <div key={column.id} className="bg-gray-100 p-4 rounded-lg">
-              <h2 className={`font-bold text-center py-2 rounded-t ${column.color}`}>
+            <div key={column.id} className="bg-gray-100 p-3 rounded-lg min-w-[280px]">
+              <h2 className={`font-bold text-center py-2 rounded-t ${column.color} text-sm sm:text-base`}>
                 {column.title} ({column.applications.length})
               </h2>
               <Droppable droppableId={column.id}>
@@ -79,13 +95,13 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ initialApplications }) => {
                   <div
                     ref={provided.innerRef}
                     {...provided.droppableProps}
-                    className="min-h-[200px] p-2"
+                    className="min-h-[150px] p-2"
                   >
                     {column.applications.map((application, index) => (
                       <div key={application.id} className="mb-2">
-                        <ApplicationCard 
-                          application={application} 
-                          index={index} 
+                        <ApplicationCard
+                          application={application}
+                          index={index}
                           isGhosted={isGhosted(application)}
                         />
                       </div>

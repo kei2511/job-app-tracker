@@ -46,13 +46,21 @@ type ApplicationFormValues = z.infer<typeof applicationSchema>;
 interface ApplicationFormProps {
   onApplicationCreated: () => void;
   trigger?: React.ReactNode;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }
 
-const ApplicationForm: React.FC<ApplicationFormProps> = ({ 
-  onApplicationCreated, 
-  trigger = <Button>Add New Application</Button>
+const ApplicationForm: React.FC<ApplicationFormProps> = ({
+  onApplicationCreated,
+  trigger = <Button>Add New Application</Button>,
+  open: controlledOpen,
+  onOpenChange
 }) => {
-  const [open, setOpen] = useState(false);
+  const [openState, setOpenState] = useState(false);
+
+  // Use controlled state if provided, otherwise use internal state
+  const open = controlledOpen !== undefined ? controlledOpen : openState;
+  const setOpen = onOpenChange || setOpenState;
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const {
@@ -96,121 +104,131 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        {trigger}
-      </DialogTrigger>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      {trigger && !controlledOpen && (
+        <DialogTrigger asChild>
+          {trigger}
+        </DialogTrigger>
+      )}
+      <DialogContent className="sm:max-w-md md:max-w-2xl max-h-[90vh] overflow-y-auto p-4">
         <DialogHeader>
-          <DialogTitle>Add New Job Application</DialogTitle>
+          <DialogTitle className="text-lg">Add New Job Application</DialogTitle>
         </DialogHeader>
-        
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="position">Position *</Label>
+
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-3">
+          <div className="grid grid-cols-1 gap-3">
+            <div className="space-y-1.5">
+              <Label htmlFor="position" className="text-sm">Position *</Label>
               <Input
                 id="position"
                 {...register('position')}
                 placeholder="Frontend Developer"
+                className="text-sm"
               />
               {errors.position && (
-                <p className="text-red-500 text-sm">{errors.position.message}</p>
+                <p className="text-red-500 text-xs">{errors.position.message}</p>
               )}
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="company_name">Company Name *</Label>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="company_name" className="text-sm">Company Name *</Label>
               <Input
                 id="company_name"
                 {...register('company_name')}
                 placeholder="Tech Corp"
+                className="text-sm"
               />
               {errors.company_name && (
-                <p className="text-red-500 text-sm">{errors.company_name.message}</p>
+                <p className="text-red-500 text-xs">{errors.company_name.message}</p>
               )}
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="platform">Platform</Label>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="platform" className="text-sm">Platform</Label>
               <Input
                 id="platform"
                 {...register('platform')}
                 placeholder="LinkedIn, Indeed, etc."
+                className="text-sm"
               />
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="job_link">Job Link</Label>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="job_link" className="text-sm">Job Link</Label>
               <Input
                 id="job_link"
                 {...register('job_link')}
                 placeholder="https://..."
+                className="text-sm"
               />
               {errors.job_link && (
-                <p className="text-red-500 text-sm">{errors.job_link.message}</p>
+                <p className="text-red-500 text-xs">{errors.job_link.message}</p>
               )}
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="contract_type">Contract Type</Label>
-              <Select 
-                value={contractType || ''} 
-                onValueChange={(value) => setValue('contract_type', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="FULL_TIME">Full-time</SelectItem>
-                  <SelectItem value="INTERNSHIP">Internship</SelectItem>
-                  <SelectItem value="FREELANCE">Freelance</SelectItem>
-                  <SelectItem value="CONTRACT">Contract</SelectItem>
-                </SelectContent>
-              </Select>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="contract_type" className="text-sm">Contract Type</Label>
+                <Select
+                  value={contractType || ''}
+                  onValueChange={(value) => setValue('contract_type', value)}
+                >
+                  <SelectTrigger className="text-sm">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="FULL_TIME">Full-time</SelectItem>
+                    <SelectItem value="INTERNSHIP">Internship</SelectItem>
+                    <SelectItem value="FREELANCE">Freelance</SelectItem>
+                    <SelectItem value="CONTRACT">Contract</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="work_model" className="text-sm">Work Model</Label>
+                <Select
+                  value={workModel || ''}
+                  onValueChange={(value) => setValue('work_model', value)}
+                >
+                  <SelectTrigger className="text-sm">
+                    <SelectValue placeholder="Select model" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="WFO">WFO</SelectItem>
+                    <SelectItem value="WFH">WFH</SelectItem>
+                    <SelectItem value="HYBRID">Hybrid</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="work_model">Work Model</Label>
-              <Select 
-                value={workModel || ''} 
-                onValueChange={(value) => setValue('work_model', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select model" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="WFO">WFO (Work From Office)</SelectItem>
-                  <SelectItem value="WFH">WFH (Work From Home)</SelectItem>
-                  <SelectItem value="HYBRID">Hybrid</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="location">Location</Label>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="location" className="text-sm">Location</Label>
               <Input
                 id="location"
                 {...register('location')}
                 placeholder="City, Country"
+                className="text-sm"
               />
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="salary_expectation">Salary Expectation (Rp)</Label>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="salary_expectation" className="text-sm">Salary Expectation (Rp)</Label>
               <Input
                 id="salary_expectation"
                 {...register('salary_expectation')}
-                placeholder="Rp 5.000.000 - Rp 8.000.000"
+                placeholder="Rp 5.000.000"
+                className="text-sm"
               />
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="status">Status</Label>
-              <Select 
-                value={status || 'APPLIED'} 
+
+            <div className="space-y-1.5">
+              <Label htmlFor="status" className="text-sm">Status</Label>
+              <Select
+                value={status || 'APPLIED'}
                 onValueChange={(value) => setValue('status', value)}
               >
-                <SelectTrigger>
+                <SelectTrigger className="text-sm">
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -225,45 +243,53 @@ const ApplicationForm: React.FC<ApplicationFormProps> = ({
                 </SelectContent>
               </Select>
             </div>
-            
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="cv_version">CV Version</Label>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="cv_version" className="text-sm">CV Version</Label>
               <Input
                 id="cv_version"
                 {...register('cv_version')}
                 placeholder="CV_Tech_v2.pdf"
+                className="text-sm"
               />
             </div>
-            
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="date_applied">Date Applied</Label>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="date_applied" className="text-sm">Date Applied</Label>
               <Input
                 id="date_applied"
                 type="date"
                 {...register('date_applied')}
+                className="text-sm"
               />
             </div>
-            
-            <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="notes">Notes</Label>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="notes" className="text-sm">Notes</Label>
               <Textarea
                 id="notes"
                 {...register('notes')}
                 placeholder="Any additional notes..."
                 rows={3}
+                className="text-sm"
               />
             </div>
           </div>
-          
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button 
-              type="button" 
-              variant="outline" 
+
+          <div className="flex justify-end space-x-2 pt-3">
+            <Button
+              type="button"
+              variant="outline"
               onClick={() => setOpen(false)}
+              className="text-sm"
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              disabled={isSubmitting}
+              className="text-sm"
+            >
               {isSubmitting ? 'Submitting...' : 'Add Application'}
             </Button>
           </div>

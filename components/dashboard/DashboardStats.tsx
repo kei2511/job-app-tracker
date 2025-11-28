@@ -13,18 +13,18 @@ const DashboardStats: React.FC<DashboardStatsProps> = ({
   activeProcesses 
 }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-      <div className="bg-card p-6 rounded-lg shadow">
-        <h3 className="text-lg font-medium text-gray-500">Total Applications</h3>
-        <p className="text-3xl font-bold mt-2">{totalApplications}</p>
+    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
+      <div className="bg-card p-4 rounded-lg shadow">
+        <h3 className="text-sm font-medium text-gray-500">Total Apps</h3>
+        <p className="text-xl sm:text-2xl font-bold mt-1">{totalApplications}</p>
       </div>
-      <div className="bg-card p-6 rounded-lg shadow">
-        <h3 className="text-lg font-medium text-gray-500">Response Rate</h3>
-        <p className="text-3xl font-bold mt-2 text-green-600">{responseRate}%</p>
+      <div className="bg-card p-4 rounded-lg shadow">
+        <h3 className="text-sm font-medium text-gray-500">Response Rate</h3>
+        <p className="text-xl sm:text-2xl font-bold mt-1 text-green-600">{responseRate}%</p>
       </div>
-      <div className="bg-card p-6 rounded-lg shadow">
-        <h3 className="text-lg font-medium text-gray-500">Active Processes</h3>
-        <p className="text-3xl font-bold mt-2">{activeProcesses}</p>
+      <div className="bg-card p-4 rounded-lg shadow">
+        <h3 className="text-sm font-medium text-gray-500">Active</h3>
+        <p className="text-xl sm:text-2xl font-bold mt-1">{activeProcesses}</p>
       </div>
     </div>
   );
