@@ -17,16 +17,19 @@ const GhostingReminder: React.FC<GhostingReminderProps> = ({ applications }) => 
 
   useEffect(() => {
     const checkForGhostedApplications = () => {
-      applications.forEach(application => {
-        if (isGhosted(application) && !remindedApplications.has(application.id)) {
-          // Set the notification data and show it
-          setNotificationApp(application);
-          setShowNotification(true);
-          
-          // Add to reminded set to prevent duplicate notifications
-          setRemindedApplications(prev => new Set(prev).add(application.id));
-        }
-      });
+      // Only show notification for applications that haven't been reminded yet
+      const unremindedGhostedApps = applications.filter(application =>
+        isGhosted(application) && !remindedApplications.has(application.id)
+      );
+
+      if (unremindedGhostedApps.length > 0) {
+        // Show notification for the first unreminded ghosted application
+        setNotificationApp(unremindedGhostedApps[0]);
+        setShowNotification(true);
+
+        // Add to reminded set to prevent duplicate notifications
+        setRemindedApplications(prev => new Set(prev).add(unremindedGhostedApps[0].id));
+      }
     };
 
     checkForGhostedApplications();

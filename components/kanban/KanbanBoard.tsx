@@ -34,18 +34,34 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ initialApplications }) => {
     if (!destination) return;
     if (destination.droppableId === source.droppableId && destination.index === source.index) return;
 
-    const updatedApplication = applications.find(app => app.id === draggableId);
-    if (!updatedApplication) return;
+    const movedApplication = applications.find(app => app.id === draggableId);
+    if (!movedApplication) return;
+
+    // Optimistically update the UI
+    const updatedAppsOptimistic = applications.map(app =>
+      app.id === draggableId ? { ...app, status: destination.droppableId as any, last_updated: new Date() } : app
+    );
+    setApplications(updatedAppsOptimistic);
 
     // Update the status in the database
-    const statusChange = await updateApplicationStatus(draggableId, destination.droppableId);
+    try {
+      const statusChange = await updateApplicationStatus(draggableId, destination.droppableId);
 
-    if (statusChange.success) {
-      // Update the local state
-      const updatedApps = applications.map(app =>
-        app.id === draggableId ? { ...app, status: destination.droppableId as any, last_updated: new Date() } : app
+      if (!statusChange.success) {
+        // If server update fails, revert the optimistic update
+        const revertedApps = applications.map(app =>
+          app.id === draggableId ? movedApplication : app
+        );
+        setApplications(revertedApps);
+        console.error('Failed to update application status:', statusChange.error);
+      }
+    } catch (error) {
+      // If server update fails, revert the optimistic update
+      const revertedApps = applications.map(app =>
+        app.id === draggableId ? movedApplication : app
       );
-      setApplications(updatedApps);
+      setApplications(revertedApps);
+      console.error('Error updating application status:', error);
     }
   };
 
