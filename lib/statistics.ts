@@ -39,9 +39,13 @@ export const calculateApplicationStats = (applications: Application[]): Applicat
   let totalDays = 0;
   let daysCount = 0;
   respondedApplications.forEach(app => {
-    if (app.last_updated && app.date_applied) {
-      const days = Math.floor((app.last_updated.getTime() - app.date_applied.getTime()) / (1000 * 60 * 60 * 24));
-      if (days >= 0) {
+    // Convert to Date objects if they're strings
+    const lastUpdated = app.last_updated instanceof Date ? app.last_updated : (typeof app.last_updated === 'string' ? new Date(app.last_updated) : null);
+    const dateApplied = app.date_applied instanceof Date ? app.date_applied : (typeof app.date_applied === 'string' ? new Date(app.date_applied) : null);
+
+    if (lastUpdated && dateApplied && lastUpdated instanceof Date && dateApplied instanceof Date) {
+      const days = Math.floor((lastUpdated.getTime() - dateApplied.getTime()) / (1000 * 60 * 60 * 24));
+      if (days >= 0 && !isNaN(days)) { // Added isNaN check for safety
         totalDays += days;
         daysCount++;
       }
@@ -52,8 +56,13 @@ export const calculateApplicationStats = (applications: Application[]): Applicat
   // Calculate monthly applications (group by month-year)
   const monthlyApplications: Record<string, number> = {};
   applications.forEach(app => {
-    const monthYear = `${app.date_applied.getFullYear()}-${(app.date_applied.getMonth() + 1).toString().padStart(2, '0')}`;
-    monthlyApplications[monthYear] = (monthlyApplications[monthYear] || 0) + 1;
+    // Convert date_applied to Date object if it's a string
+    const dateApplied = app.date_applied instanceof Date ? app.date_applied : (typeof app.date_applied === 'string' ? new Date(app.date_applied) : null);
+
+    if (dateApplied && dateApplied instanceof Date && !isNaN(dateApplied.getTime())) {
+      const monthYear = `${dateApplied.getFullYear()}-${(dateApplied.getMonth() + 1).toString().padStart(2, '0')}`;
+      monthlyApplications[monthYear] = (monthlyApplications[monthYear] || 0) + 1;
+    }
   });
 
   // Calculate top companies
